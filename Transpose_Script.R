@@ -8,10 +8,10 @@ files <- map(str_c("aoicprobationfiles/aoicprobationfiles/", folders), list.file
 ## name the list for for each folder
 names(files) <- folders
 
-for (i in seq_along(folders)) {
+for (i in 1:length(folders)) {
   folder <- folders[i]
   ## Separating the year from the Circuits. Files[[1]] is 2022, files[[2]] is 2023, etc.
-  for (j in seq_along(files[[i]])) {
+  for (j in 1:length(files[[i]])) {
     file <- files[[i]][j]
     map(str_split(files[[i]], pattern = "_"), ~ .[1]) %>%  unlist()
     map(str_split(files[[i]], pattern = "_"), ~ .[2]) %>%  unlist()
@@ -47,7 +47,7 @@ for (i in seq_along(folders)) {
       
       ## Checking for and removing any column that is completely NA
       na_cols <- is.na(names(df))
-      df_clean <- df[, !na_cols]
+      df_clean <- df[, !na_cols, drop = FALSE]
       ## Making everything numeric except for columns that have character values 
       ## and selecting just the columns for each month and gearing up to write .xlsx file
       ### find those columns that are not missing or contain a string of some kind (not numbers)
@@ -72,52 +72,3 @@ for (i in seq_along(folders)) {
     }
   }
 }
-
-# ## Practice by taking one path example.
-# 
-# ## This reads all of the sheets but we want to remove "Table of Contents"
-# ## for...
-# excel_sheets(path_ex)[-1]
-# 
-# ## Read in one excel file with all of the sheets into a list
-# read <- map(excel_sheets(path_ex)[-1], 
-#                        ~ read_excel(path = path_ex, sheet = sheet, skip = 1))
-# # naming to match sheets
-# names(read) <- excel_sheets(path_ex)[-1]                   
-# 
-# ## It worked: use t() to transpose the data file
-# dat <- t(read[[1]])
-# names(dat) <- t(read)
-# 
-# df <- data.frame(dat) %>% 
-#   rownames_to_column("month")
-# 
-# names(df) <- df[1,]
-# 
-# df <- df[-1,]
-# 
-# ## Checking for and removing any column that is completely NA
-# na_cols <- is.na(names(df))
-# 
-# df_clean <- df[, !na_cols]
-# ## Making everything numeric except for columns that have character values 
-# ## and selecting just the columns for each month and gearing up to write .xlsx file
-# ### find those columns that are not missing or contain a string of some kind (not numbers)
-# strings <- sapply(df_clean[1,], function(x) !is.na(x) && !grepl("^[0-9.]+$", x))
-# ## those columns that are strings
-# df_clean[strings == TRUE]
-# ### those that are numeric make numeric
-# df_clean[strings == FALSE] = map(df_clean[strings == FALSE], as.numeric)
-# 
-# lapply(df_clean[14:28, 1:length(names(df_clean))], function(x) sum(is.na(x)))
-# 
-# df_clean[14:28, 1:length(names(df_clean))] %>% view()
-# ## all of these are percentages of data we already keep
-# ## can remove
-# 
-# ready_file <- df_clean[1:12, 1:length(names(df_clean))] %>% 
-#   rename(month = ...1) %>% 
-#   mutate(circuit_year = excel_sheets(path_ex)[-1][1], .before = month)
-# 
-# ## Writing out to excel
-# write.xlsx(ready_file, paste0("transposed_files/", str_replace_all(excel_sheets(path_ex)[-1][1]," ", ""), ".xlsx"))
